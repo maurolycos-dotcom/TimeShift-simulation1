@@ -1109,7 +1109,7 @@ simSlider.addEventListener('input', () => {
   if(currentClockMode === 'sim') updateClockDisplay();
 });
 
-// ERSETZTE MATHEMATISCHE BERECHNUNG AUS CODE 2
+// AUSSCHLIESSLICH DIESE BERECHNUNG WURDE DURCH CODE 2 ERSETZT:
 function updateSimulationClock() {
   if(!isFlightActive) return;
 
@@ -1128,7 +1128,7 @@ function updateSimulationClock() {
     simPercent.textContent = `${Math.round(simSlider.value)}%`;
   }
 
-  // --- MATHEMATIK AUS CODE 2 ---
+  // --- BERECHNUNG AUS CODE 2 ---
   const startDate = new Date(flightStartTime);
   const startOrtszeit = getMinutesSinceMidnight(startDate, startCityObj.timezone);
   
