@@ -6,14 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TimeShift</title>
 
-<!-- --- ICON & PWA EINSTELLUNGEN --- -->
 <link rel="icon" type="image/png" href="icon.png">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0a0e17">
 
 <style>
-
 * {
     box-sizing: border-box;
 }
@@ -44,11 +42,6 @@ body {
     margin: 0 auto;
 }
 
-
-/* =====================================================
-   KOPFZEILE
-   ===================================================== */
-
 .app-header {
     display: flex;
     align-items: center;
@@ -66,11 +59,6 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
-
-
-/* =====================================================
-   UHR-AUSWAHL DROPDOWN
-   ===================================================== */
 
 .clock-selector {
     position: relative;
@@ -203,11 +191,6 @@ body {
     font-size: 14px;
 }
 
-
-/* =====================================================
-   START / ZIEL SUCHE
-   ===================================================== */
-
 .selection {
     display: flex;
     justify-content: space-between;
@@ -335,11 +318,6 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-
-/* =====================================================
-   FLUGZEIT EINGABE
-   ===================================================== */
-
 .flight-duration {
     margin-bottom: 8px;
 }
@@ -378,11 +356,6 @@ body {
 #flightDurationInput::placeholder { color: #475569; opacity: 1; }
 #flightDurationInput:focus { background: #1e293b; border-color: #00e5ff; box-shadow: 0 0 10px rgba(0, 229, 255, 0.4); }
 #flightDurationInput:disabled { opacity: 0.4; }
-
-
-/* =====================================================
-   UHREN-BEREICH
-   ===================================================== */
 
 .clocks-area {
     display: flex;
@@ -533,11 +506,6 @@ body {
     z-index: 9;
     box-shadow: 0 0 6px rgba(255, 107, 0, 0.6);
 }
-
-
-/* =====================================================
-   FLUGFORTSCHRITT & ANKUNFT
-   ===================================================== */
 
 .flight-status {
     width: 100%;
@@ -694,7 +662,6 @@ body {
     margin-top: 2px;
 }
 
-/* FEHLER & BUTTONS */
 #errorMessage {
     min-height: 16px;
     margin-top: 4px;
@@ -753,11 +720,6 @@ button:disabled { opacity: 0.4; }
     border-color: rgba(225, 29, 72, 0.4);
     color: #fecdd3;
 }
-
-
-/* =====================================================
-   SICHERHEITSABFRAGE DIALOG
-   ===================================================== */
 
 .modal-backdrop {
     display: none;
@@ -858,7 +820,6 @@ button:disabled { opacity: 0.4; }
     transform: scale(0.98);
 }
 
-
 @media (max-height: 700px), (max-width: 600px) {
     .app { padding: 8px 10px 12px; }
     .app-header { margin-bottom: 4px; }
@@ -919,20 +880,16 @@ button:disabled { opacity: 0.4; }
     button { padding: 8px 16px; font-size: 13px; }
     #startButton { padding: 9px 18px; font-size: 14px; }
 }
-
 </style>
 </head>
-
 
 <body>
 
 <div class="app">
 
-<!-- KOPFZEILE -->
 <div class="app-header">
     <h1>✈️ TimeShift</h1>
     
-    <!-- UHR-AUSWAHL DROPDOWN -->
     <div class="clock-selector">
         <button id="clockSelectorButton" data-mode="withoutSeconds" type="button" aria-label="Uhrdarstellung wechseln">
             <div class="clock-icon minor-mode">
@@ -962,7 +919,6 @@ button:disabled { opacity: 0.4; }
     </div>
 </div>
 
-<!-- START / ZIEL SUCHE -->
 <div class="selection">
     <div class="selection-group">
         <label>Abflugort</label>
@@ -977,7 +933,6 @@ button:disabled { opacity: 0.4; }
     </div>
 </div>
 
-<!-- FLUGZEIT EINGABE -->
 <div class="flight-duration">
     <label>Flugzeit</label>
     <div class="duration-input-wrapper">
@@ -985,14 +940,12 @@ button:disabled { opacity: 0.4; }
     </div>
 </div>
 
-<!-- UHREN-BEREICH -->
 <div class="clocks-area">
     <div class="local-clock">
         <div id="startTime" class="local-time">--:--</div>
         <div id="startCity" class="local-city">—</div>
     </div>
 
-    <!-- Analoguhr -->
     <div class="clock" id="clock">
         <div class="tick-container" id="tickContainer"></div>
         <div id="numbersContainer"></div>
@@ -1009,7 +962,6 @@ button:disabled { opacity: 0.4; }
     </div>
 </div>
 
-<!-- FLUGFORTSCHRITT & ANKUNFT -->
 <div id="flightStatusBox" class="flight-status">
     <div class="flight-status-header">
         <div class="flight-status-title">FLUGFORTSCHRITT</div>
@@ -1050,7 +1002,6 @@ button:disabled { opacity: 0.4; }
 
 </div>
 
-<!-- SICHERHEITSABFRAGE DIALOG -->
 <div id="dialogBackground" class="modal-backdrop">
     <div class="modal-container">
         <h2 class="modal-title">Flug abbrechen?</h2>
@@ -1064,10 +1015,6 @@ button:disabled { opacity: 0.4; }
 </div>
 
 <script>
-
-// =====================================================
-// 1. OFFLINE-SERVICE-WORKER REGISTRIEREN
-// =====================================================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./sw.js')
@@ -1076,8 +1023,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-
-// STÄDTE-DATENBANK
 const staedte = [
     { name: "Amsterdam", timezone: "Europe/Amsterdam" },
     { name: "Athen", timezone: "Europe/Athens" },
@@ -1147,7 +1092,6 @@ const staedte = [
 
 staedte.sort((a, b) => a.name.localeCompare(b.name, "de"));
 
-// FAVORITEN MANAGEMENT
 const FAVORITEN_KEY = "timeShiftFavoriten";
 
 function favoritenLaden() {
@@ -1183,7 +1127,6 @@ function favoritLoeschen(stadt) {
     favoritenSpeichern(favoriten);
 }
 
-// ZIFFERBLATT RENDERN
 function renderClockFace() {
     const tickContainer = document.getElementById('tickContainer');
     const numbersContainer = document.getElementById('numbersContainer');
@@ -1222,7 +1165,6 @@ function renderClockFace() {
 renderClockFace();
 window.addEventListener('resize', renderClockFace);
 
-// VARIABLEN FÜR LOGIK
 let startzeit = null;
 let startZeitzone = null;
 let zielZeitzone = null;
@@ -1232,7 +1174,6 @@ let zeitverschiebung = null;
 let gesamtFlugzeit = null;
 let timer = null;
 
-// ELEMENTE REFERENZEN
 const startSearch = document.getElementById("startSearch");
 const destinationSearch = document.getElementById("destinationSearch");
 const startResults = document.getElementById("startResults");
@@ -1250,7 +1191,6 @@ const flightStatusBox = document.getElementById("flightStatusBox");
 const simulationNotice = document.getElementById("simulationNotice");
 const simulationSlider = document.getElementById("simulationSlider");
 
-// FLUGZEIT EINGABE-LOGIK
 let flugzeitZiffern = "";
 
 function flugzeitFormatieren(ziffern) {
@@ -1294,7 +1234,6 @@ flightDurationInput.addEventListener("keydown", function(event) {
     event.preventDefault();
 });
 
-// UHR-AUSWAHL DROPDOWN LOGIK
 const clockSelectorButton = document.getElementById("clockSelectorButton");
 const clockSelectorMenu = document.getElementById("clockSelectorMenu");
 const clockOptions = document.querySelectorAll(".clock-option");
@@ -1338,33 +1277,30 @@ document.addEventListener("click", function() {
     clockSelectorMenu.classList.remove("open");
 });
 
-// STÄDTE-SUCHE & ERGEBNISSE (Angepasst: Favoriten ganz oben fixieren, Treffer darunter, keine Duplikate)
+// STÄDTE-SUCHE & ERGEBNISSE (NUR WORTANFANG)
 function ergebnisseAnzeigen(input, container, ziel) {
     if (input.disabled) return;
     
     const Suchtext = input.value.trim().toLocaleLowerCase("de");
     container.innerHTML = "";
 
-    // 1. Alle gespeicherten Favoriten ermitteln
     const favObjekte = staedte.filter(stadt => istFavorit(stadt));
 
-    // 2. Suchergebnisse filtern
+    // WORTANFANG PRÜFEN MIT startsWith STATT includes
     let gefilterteStaedte = [];
     if (Suchtext !== "") {
         gefilterteStaedte = staedte.filter(stadt => 
-            stadt.name.toLocaleLowerCase("de").includes(Suchtext)
+            stadt.name.toLocaleLowerCase("de").startsWith(Suchtext)
         );
     } else {
         gefilterteStaedte = staedte.slice();
     }
 
-    // 3. Aus den Treffern diejenigen trennen, die KEIN Favorit sind
     const normaleTreffer = gefilterteStaedte.filter(stadt => !istFavorit(stadt));
 
-    // A) FAVORITEN ANZEIGEN:
     const passendeFavs = Suchtext === "" 
         ? favObjekte 
-        : favObjekte.filter(stadt => stadt.name.toLocaleLowerCase("de").includes(Suchtext));
+        : favObjekte.filter(stadt => stadt.name.toLocaleLowerCase("de").startsWith(Suchtext));
 
     if (passendeFavs.length > 0) {
         const titel = document.createElement("div");
@@ -1377,14 +1313,12 @@ function ergebnisseAnzeigen(input, container, ziel) {
         });
     }
 
-    // B) SUCHERGEBNISSE ANZEIGEN:
     if (Suchtext !== "") {
         normaleTreffer.forEach(stadt => {
             container.appendChild(erstelleErgebnis(stadt, ziel, false, input, container));
         });
     }
 
-    // Anzeigen oder Verbergen des Dropdowns
     if (container.children.length === 0) {
         container.style.display = "none";
     } else {
@@ -1443,7 +1377,6 @@ function erstelleErgebnis(stadt, ziel, favorit, input, container) {
     return element;
 }
 
-// EVENTS FÜR INPUT-FELDER DYNAMISCHER KORREKTUREN
 startSearch.addEventListener("focus", function() { 
     startSearch.select(); 
     ergebnisseAnzeigen(startSearch, startResults, "start"); 
@@ -1477,7 +1410,6 @@ document.addEventListener("click", function(event) {
     }
 });
 
-// BERECHNUNGS-LOGIK
 function flugzeitAuslesen() {
     if (flugzeitZiffern === "") return null;
     const zahl = Number(flugzeitZiffern);
@@ -1700,7 +1632,6 @@ function zweiStellen(zahl) {
     return String(Math.floor(zahl)).padStart(2, "0");
 }
 
-// FLUGZUSTAND SPEICHERN & WIEDERHERSTELLEN
 const FLIGHT_STORAGE_KEY = "timeShift_active_flight";
 
 function flugSpeichern() {
@@ -1803,13 +1734,11 @@ startButton.addEventListener("click", function() {
 
 window.addEventListener("DOMContentLoaded", flugWiederherstellen);
 
-// Regelmäßiges Update der Uhrzeiten vor Flugstart
 setInterval(function() {
     if (startzeit === null) {
         aktualisiereOrtszeiten();
     }
 }, 1000);
-
 </script>
 
 </body>
