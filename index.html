@@ -756,7 +756,7 @@ button:disabled { opacity: 0.4; }
 
 
 /* =====================================================
-   SICHERHEITSABFRAGE DIALOG (ENTSCHÄRFTES WEINROT)
+   SICHERHEITSABFRAGE DIALOG
    ===================================================== */
 
 .modal-backdrop {
@@ -826,7 +826,6 @@ button:disabled { opacity: 0.4; }
     transition: all 0.2s ease;
 }
 
-/* PRIMÄR-BUTTON: ELEGANTES WEINROT / CRIMSON (DEZENT & PASSEND ZUM DARK-MODE) */
 .btn-danger {
     background: linear-gradient(135deg, #9f1239 0%, #881337 100%);
     border: 1px solid rgba(225, 29, 72, 0.3);
@@ -844,7 +843,6 @@ button:disabled { opacity: 0.4; }
     transform: scale(0.98);
 }
 
-/* SEKUNDÄR-BUTTON: WEITERFLIEGEN */
 .btn-secondary {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1340,7 +1338,7 @@ document.addEventListener("click", function() {
     clockSelectorMenu.classList.remove("open");
 });
 
-// STÄDTE-SUCHE & ERGEBNISSE
+// STÄDTE-SUCHE & ERGEBNISSE (Angepasst: Favoriten ganz oben fixieren, Treffer darunter, keine Duplikate)
 function ergebnisseAnzeigen(input, container, ziel) {
     if (input.disabled) return;
     
@@ -1364,8 +1362,6 @@ function ergebnisseAnzeigen(input, container, ziel) {
     const normaleTreffer = gefilterteStaedte.filter(stadt => !istFavorit(stadt));
 
     // A) FAVORITEN ANZEIGEN:
-    // Werden angezeigt, wenn es Favoriten gibt UND entweder das Suchfeld leer ist 
-    // ODER mindestens einer der Favoriten zum Suchtext passt.
     const passendeFavs = Suchtext === "" 
         ? favObjekte 
         : favObjekte.filter(stadt => stadt.name.toLocaleLowerCase("de").includes(Suchtext));
@@ -1382,7 +1378,6 @@ function ergebnisseAnzeigen(input, container, ziel) {
     }
 
     // B) SUCHERGEBNISSE ANZEIGEN:
-    // Nur rendern, wenn ein Suchtext eingegeben wurde
     if (Suchtext !== "") {
         normaleTreffer.forEach(stadt => {
             container.appendChild(erstelleErgebnis(stadt, ziel, false, input, container));
@@ -1532,7 +1527,6 @@ startButton.addEventListener("click", function() {
     berechnen();
 });
 
-// STYLING-BEZOGENE DIALOG EVENT HANDLER
 cancelButton.addEventListener("click", function() { 
     dialogBackground.classList.add("active"); 
 });
@@ -1546,7 +1540,6 @@ dialogConfirm.addEventListener("click", function() {
     flugZuruecksetzen();
 });
 
-// EVENTS FÜR DEN SIMULATIONS-SLIDER (OPTION 3)
 simulationSlider.addEventListener("input", function() {
     if (clockSelectorButton.dataset.mode === "simulation" && startzeit !== null) {
         berechnen();
@@ -1577,18 +1570,12 @@ function berechnen() {
         simulationSlider.value = fortschrittProzent;
     }
 
-    // --- MATHEMATIK AUS VERSION 2 ---
-    // Simulierter Zeitpunkt des Flugzeugs in UTC
     const flugzeugZeitUTC = new Date(startzeit.getTime() + vergangen * 60000);
-
-    // Ortszeit am Abflugort zum aktuellen Flugzeitpunkt
     const startMinuten = minutenSeitMitternacht(flugzeugZeitUTC, startZeitzone);
 
-    // Zeitzonenverschiebung kontinuierlich mit dem Flugfortschritt einrechnen
     const fortschritt = vergangen / gesamtFlugzeit;
     const angerechneteVerschiebung = zeitverschiebung * fortschritt;
 
-    // Gesamte lokale Zeit des Flugzeugs (in Minuten ab Mitternacht)
     let flugzeugMinuten = normalisiereMinuten(startMinuten + angerechneteVerschiebung);
 
     const stunden = flugzeugMinuten / 60;
