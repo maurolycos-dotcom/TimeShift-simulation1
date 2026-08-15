@@ -1,1098 +1,430 @@
 <!DOCTYPE html>
 <html lang="de">
-
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TimeShift</title>
-
-<style>
-
-* {
-    box-sizing: border-box;
-}
-
-body {
-    background: #111;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 0;
-    padding: 20px;
-}
-
-.app {
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-h1 {
-    font-size: 26px;
-    margin-bottom: 20px;
-}
-
-/* START / ZIEL SUCHE */
-
-.selection {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.selection-group {
-    width: 180px;
-    position: relative;
-}
-
-.selection label {
-    display: block;
-    color: #aaa;
-    font-size: 13px;
-    margin-bottom: 5px;
-}
-
-.search-input {
-    width: 100%;
-    padding: 10px;
-    font-size: 16px;
-    border: none;
-    border-radius: 10px;
-    background: #222;
-    color: white;
-    outline: none;
-    text-align: center;
-}
-
-.search-input:focus {
-    background: #2a2a2a;
-}
-
-.search-input::placeholder {
-    color: #777;
-}
-
-.arrow {
-    font-size: 22px;
-    margin-top: 28px;
-}
-
-.results {
-    position: absolute;
-    top: 62px;
-    left: 0;
-    width: 100%;
-    max-height: 200px;
-    overflow-y: auto;
-    background: #222;
-    border-radius: 12px;
-    z-index: 50;
-    display: none;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.result {
-    min-height: 42px;
-    padding: 6px 8px;
-    border-bottom: 1px solid #333;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.result:last-child {
-    border-bottom: none;
-}
-
-.city-name {
-    flex: 1;
-    cursor: pointer;
-    text-align: left;
-    padding-left: 6px;
-}
-
-.favorite-button,
-.delete-favorite-button {
-    width: 34px;
-    height: 34px;
-    margin: 0;
-    padding: 0;
-    border: none;
-    border-radius: 8px;
-    background: transparent;
-    color: white;
-    cursor: pointer;
-}
-
-.favorite-button {
-    font-size: 18px;
-}
-
-.delete-favorite-button {
-    font-size: 15px;
-}
-
-.favorite-button:active,
-.delete-favorite-button:active {
-    background: #444;
-}
-
-.favorite-title {
-    padding: 8px 8px 5px;
-    color: #aaa;
-    font-size: 11px;
-    text-align: left;
-    border-bottom: 1px solid #333;
-}
-
-/* FLUGZEIT EINGABE */
-
-.flight-duration {
-    margin-bottom: 20px;
-}
-
-.flight-duration label {
-    display: block;
-    color: #aaa;
-    font-size: 13px;
-    margin-bottom: 5px;
-}
-
-.duration-input-wrapper {
-    display: flex;
-    justify-content: center;
-}
-
-#flightDurationInput {
-    width: 140px;
-    padding: 10px;
-    font-family: "Courier New", monospace;
-    font-size: 22px;
-    font-weight: bold;
-    border: none;
-    border-radius: 10px;
-    background: #222;
-    color: white;
-    outline: none;
-    text-align: center;
-    letter-spacing: 2px;
-}
-
-#flightDurationInput::placeholder {
-    color: #666;
-    opacity: 1;
-}
-
-#flightDurationInput:focus {
-    background: #2a2a2a;
-}
-
-#flightDurationInput:disabled {
-    opacity: 0.5;
-}
-
-/* UHREN-BEREICH */
-
-.clocks-area {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 20px;
-}
-
-.local-clock {
-    width: 85px;
-}
-
-.local-time {
-    font-family: "Courier New", monospace;
-    font-size: 18px;
-    font-weight: bold;
-    white-space: nowrap;
-}
-
-.local-city {
-    margin-top: 4px;
-    font-size: 12px;
-    color: #aaa;
-}
-
-.clock {
-    width: 220px;
-    height: 220px;
-    background: white;
-    border: 6px solid #222;
-    border-radius: 50%;
-    position: relative;
-    flex-shrink: 0;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
-}
-
-.tick {
-    position: absolute;
-    width: 2px;
-    height: 10px;
-    background: #111;
-    left: 109px;
-    top: 4px;
-    transform-origin: 1px 106px;
-}
-
-.tick.minor {
-    height: 5px;
-    width: 1px;
-    left: 109.5px;
-    background: #888;
-}
-
-.number {
-    position: absolute;
-    font-family: Arial, sans-serif;
-    font-size: 20px;
-    font-weight: bold;
-    color: #111;
-    text-align: center;
-    width: 30px;
-    height: 30px;
-    line-height: 30px;
-    margin-left: -15px;
-    margin-top: -15px;
-}
-
-.center {
-    width: 12px;
-    height: 12px;
-    background: #111;
-    border-radius: 50%;
-    position: absolute;
-    left: 104px;
-    top: 104px;
-    z-index: 10;
-}
-
-.hand {
-    position: absolute;
-    left: 108px;
-    top: 110px;
-    transform-origin: top center;
-    background: #111;
-    border-radius: 2px;
-}
-
-.hour-hand {
-    width: 4px;
-    height: 50px;
-}
-
-.minute-hand {
-    width: 3px;
-    height: 75px;
-}
-
-.second-hand {
-    width: 1px;
-    height: 85px;
-    background: red;
-}
-
-/* FLUGFORTSCHRITT & ANKUNFT */
-
-.flight-status {
-    background: #1c1c1c;
-    border-radius: 16px;
-    padding: 15px;
-    margin-bottom: 20px;
-}
-
-.flight-status-title {
-    color: #aaa;
-    font-size: 12px;
-    letter-spacing: 1px;
-    margin-bottom: 12px;
-}
-
-.flight-times {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.flight-time-block {
-    flex: 1;
-}
-
-.flight-time-label {
-    display: block;
-    color: #888;
-    font-size: 12px;
-    margin-bottom: 4px;
-}
-
-.flight-time-value {
-    display: block;
-    font-family: "Courier New", monospace;
-    font-size: 22px;
-    font-weight: bold;
-    letter-spacing: 1px;
-}
-
-.flight-time-divider {
-    width: 1px;
-    height: 35px;
-    background: #333;
-    margin: 0 10px;
-}
-
-.arrival {
-    margin-top: 15px;
-    padding-top: 15px;
-    border-top: 1px solid #2a2a2a;
-}
-
-.arrival-title {
-    color: #aaa;
-    font-size: 12px;
-    letter-spacing: 1px;
-    margin-bottom: 6px;
-}
-
-.arrival-city {
-    font-size: 16px;
-    font-weight: bold;
-    margin-bottom: 2px;
-}
-
-.arrival-date {
-    font-size: 14px;
-    color: #ccc;
-}
-
-.arrival-time {
-    font-family: "Courier New", monospace;
-    font-size: 20px;
-    font-weight: bold;
-    margin-top: 4px;
-}
-
-/* FEHLER & BUTTONS */
-
-#errorMessage {
-    min-height: 20px;
-    margin-bottom: 15px;
-    color: #ff6b6b;
-    font-size: 14px;
-}
-
-.button-area {
-    margin-top: 10px;
-}
-
-button {
-    padding: 12px 24px;
-    font-size: 16px;
-    border: none;
-    border-radius: 10px;
-    background: white;
-    color: black;
-    cursor: pointer;
-}
-
-button:disabled {
-    opacity: 0.5;
-    cursor: default;
-}
-
-#cancelButton {
-    display: none;
-    margin-left: 10px;
-    background: #333;
-    color: white;
-}
-
-/* DIALOG */
-
-.dialog-background {
-    display: none;
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-}
-
-.dialog {
-    width: 80%;
-    max-width: 320px;
-    background: #222;
-    border-radius: 16px;
-    padding: 20px;
-}
-
-.dialog h2 {
-    margin-top: 0;
-    font-size: 18px;
-}
-
-.dialog p {
-    color: #aaa;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.dialog button {
-    width: 100%;
-    margin-left: 0;
-    margin-top: 10px;
-}
-
-.confirm-cancel {
-    background: #444;
-    color: white;
-}
-
-.confirm-stop {
-    background: #c00;
-    color: white;
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jetlag Clock</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent-color: #38bdf8;
+            --accent-hover: #0284c7;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-align: center;
+            color: var(--accent-color);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        select, input[type="datetime-local"], input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        button.secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+        }
+
+        button.secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .clock-container {
+            display: flex;
+            justify-content: center;
+            margin: 24px 0;
+        }
+
+        canvas {
+            background-color: var(--bg-color);
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+        }
+
+        .slider-container {
+            margin-top: 16px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent-color);
+        }
+
+        .info-panel {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            font-size: 0.875rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+        }
+    </style>
 </head>
-
 <body>
 
-<div class="app">
+<div class="container">
+    <h1>Jetlag Clock</h1>
 
-<h1>✈️ TimeShift</h1>
-
-<!-- START / ZIEL SUCHE -->
-<div class="selection">
-    <div class="selection-group">
-        <label>Abflugort</label>
-        <input id="startSearch" class="search-input" type="text" placeholder="Ort suchen" autocomplete="off">
-        <div id="startResults" class="results"></div>
-    </div>
-    <div class="arrow">→</div>
-    <div class="selection-group">
-        <label>Zielort</label>
-        <input id="destinationSearch" class="search-input" type="text" placeholder="Ort suchen" autocomplete="off">
-        <div id="destinationResults" class="results"></div>
-    </div>
-</div>
-
-<!-- FLUGZEIT EINGABE -->
-<div class="flight-duration">
-    <label>Flugzeit</label>
-    <div class="duration-input-wrapper">
-        <input id="flightDurationInput" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" placeholder="00:00" aria-label="Flugzeit">
-    </div>
-</div>
-
-<!-- UHREN-BEREICH -->
-<div class="clocks-area">
-    <div class="local-clock">
-        <div id="startTime" class="local-time">--:--</div>
-        <div id="startCity" class="local-city">—</div>
+    <div class="form-group">
+        <label for="depCity">Abflughafen / Stadt</label>
+        <select id="depCity"></select>
     </div>
 
-    <!-- Analoguhr -->
-    <div class="clock">
-        <div id="ticksContainer"></div>
-        <div id="numbersContainer"></div>
-
-        <div id="hourHand" class="hand hour-hand"></div>
-        <div id="minuteHand" class="hand minute-hand"></div>
-        <div id="secondHand" class="hand second-hand" style="display:none;"></div>
-        <div class="center"></div>
+    <div class="form-group">
+        <label for="arrCity">Zielflughafen / Stadt</label>
+        <select id="arrCity"></select>
     </div>
 
-    <div class="local-clock">
-        <div id="destinationTime" class="local-time">--:--</div>
-        <div id="destinationCity" class="local-city">—</div>
+    <div class="form-group">
+        <label for="departureTime">Abflugzeit (Lokalzeit)</label>
+        <input type="datetime-local" id="departureTime">
     </div>
-</div>
 
-<!-- FLUGFORTSCHRITT & ANKUNFT -->
-<div class="flight-status">
-    <div class="flight-status-title">FLUGFORTSCHRITT</div>
-    <div class="flight-times">
-        <div class="flight-time-block">
-            <span class="flight-time-label">Vergangen</span>
-            <span id="elapsed" class="flight-time-value">00:00</span>
+    <div class="form-group">
+        <label for="flightDuration">Flugdauer (Stunden)</label>
+        <input type="number" id="flightDuration" min="0.5" step="0.5" value="8">
+    </div>
+
+    <div class="button-group">
+        <button id="startBtn">Flug starten</button>
+        <button id="resetBtn" class="secondary">Zurücksetzen</button>
+    </div>
+
+    <div class="clock-container">
+        <canvas id="sim-clock" width="200" height="200"></canvas>
+    </div>
+
+    <div class="slider-container">
+        <label for="simSlider">Flugfortschritt: <span id="progressText">0%</span></label>
+        <input type="range" id="simSlider" min="0" max="100" value="0">
+    </div>
+
+    <div class="info-panel">
+        <div class="info-row">
+            <span>Simulierte Ortszeit:</span>
+            <strong id="simTimeDisplay">--:--</strong>
         </div>
-        <div class="flight-time-divider"></div>
-        <div class="flight-time-block">
-            <span class="flight-time-label">Verbleibend</span>
-            <span id="remaining" class="flight-time-value">--:--</span>
+        <div class="info-row">
+            <span>Verstrichene Zeit:</span>
+            <span id="elapsedDisplay">0 Std. 0 Min.</span>
         </div>
-    </div>
-
-    <div class="arrival">
-        <div class="arrival-title">ANKUNFT</div>
-        <div id="arrivalCity" class="arrival-city">—</div>
-        <div id="arrivalDate" class="arrival-date">—</div>
-        <div id="arrivalTime" class="arrival-time">--:--</div>
-    </div>
-</div>
-
-<div id="errorMessage"></div>
-
-<div class="button-area">
-    <button id="startButton">Flug starten</button>
-    <button id="cancelButton">Flug abbrechen</button>
-</div>
-
-</div>
-
-<!-- SICHERHEITSABFRAGE DIALOG -->
-<div id="dialogBackground" class="dialog-background">
-    <div class="dialog">
-        <h2>Flug abbrechen?</h2>
-        <p>Möchtest du den aktuellen Flug wirklich abbrechen?</p>
-        <p>Der bisherige Flugfortschritt geht verloren.</p>
-        <button id="dialogCancel" class="confirm-cancel">Weiterfliegen</button>
-        <button id="dialogConfirm" class="confirm-stop">Flug abbrechen</button>
     </div>
 </div>
 
 <script>
-
-// STÄDTE-DATENBANK
-const staedte = [
-    { name: "Amsterdam", timezone: "Europe/Amsterdam" },
-    { name: "Athen", timezone: "Europe/Athens" },
-    { name: "Atlanta", timezone: "America/New_York" },
-    { name: "Bangkok", timezone: "Asia/Bangkok" },
-    { name: "Barcelona", timezone: "Europe/Madrid" },
-    { name: "Beijing", timezone: "Asia/Shanghai" },
-    { name: "Berlin", timezone: "Europe/Berlin" },
-    { name: "Boston", timezone: "America/New_York" },
-    { name: "Brüssel", timezone: "Europe/Brussels" },
-    { name: "Budapest", timezone: "Europe/Budapest" },
-    { name: "Buenos Aires", timezone: "America/Argentina/Buenos_Aires" },
-    { name: "Chicago", timezone: "America/Chicago" },
-    { name: "Dallas", timezone: "America/Chicago" },
-    { name: "Delhi", timezone: "Asia/Kolkata" },
-    { name: "Denver", timezone: "America/Denver" },
-    { name: "Dubai", timezone: "Asia/Dubai" },
-    { name: "Dublin", timezone: "Europe/Dublin" },
-    { name: "Edinburgh", timezone: "Europe/London" },
-    { name: "Frankfurt", timezone: "Europe/Berlin" },
-    { name: "Genf", timezone: "Europe/Zurich" },
-    { name: "Helsinki", timezone: "Europe/Helsinki" },
-    { name: "Hongkong", timezone: "Asia/Hong_Kong" },
-    { name: "Istanbul", timezone: "Europe/Istanbul" },
-    { name: "Jakarta", timezone: "Asia/Jakarta" },
-    { name: "Johannesburg", timezone: "Africa/Johannesburg" },
-    { name: "Kairo", timezone: "Africa/Cairo" },
-    { name: "Kapstadt", timezone: "Africa/Johannesburg" },
-    { name: "Kopenhagen", timezone: "Europe/Copenhagen" },
-    { name: "Kuala Lumpur", timezone: "Asia/Kuala_Lumpur" },
-    { name: "Lissabon", timezone: "Europe/Lisbon" },
-    { name: "London", timezone: "Europe/London" },
-    { name: "Los Angeles", timezone: "America/Los_Angeles" },
-    { name: "Madrid", timezone: "Europe/Madrid" },
-    { name: "Mailand", timezone: "Europe/Rome" },
-    { name: "Manila", timezone: "Asia/Manila" },
-    { name: "Melbourne", timezone: "Australia/Melbourne" },
-    { name: "Mexiko-Stadt", timezone: "America/Mexico_City" },
-    { name: "Miami", timezone: "America/New_York" },
-    { name: "Montreal", timezone: "America/Toronto" },
-    { name: "Moskau", timezone: "Europe/Moscow" },
-    { name: "München", timezone: "Europe/Berlin" },
-    { name: "New York", timezone: "America/New_York" },
-    { name: "Osaka", timezone: "Asia/Tokyo" },
-    { name: "Oslo", timezone: "Europe/Oslo" },
-    { name: "Paris", timezone: "Europe/Paris" },
-    { name: "Perth", timezone: "Australia/Perth" },
-    { name: "Prag", timezone: "Europe/Prague" },
-    { name: "Reykjavík", timezone: "Atlantic/Reykjavik" },
-    { name: "Rom", timezone: "Europe/Rome" },
-    { name: "San Francisco", timezone: "America/Los_Angeles" },
-    { name: "São Paulo", timezone: "America/Sao_Paulo" },
-    { name: "Seoul", timezone: "Asia/Seoul" },
-    { name: "Shanghai", timezone: "Asia/Shanghai" },
-    { name: "Singapur", timezone: "Asia/Singapore" },
-    { name: "Stockholm", timezone: "Europe/Stockholm" },
-    { name: "Sydney", timezone: "Australia/Sydney" },
-    { name: "Taipeh", timezone: "Asia/Taipei" },
-    { name: "Tokio", timezone: "Asia/Tokyo" },
-    { name: "Toronto", timezone: "America/Toronto" },
-    { name: "Vancouver", timezone: "America/Vancouver" },
-    { name: "Venedig", timezone: "Europe/Rome" },
-    { name: "Warschau", timezone: "Europe/Warsaw" },
-    { name: "Wien", timezone: "Europe/Vienna" },
-    { name: "Zürich", timezone: "Europe/Zurich" }
-];
-
-staedte.sort((a, b) => a.name.localeCompare(b.name, "de"));
-
-// FAVORITEN MANAGEMENT
-const FAVORITEN_KEY = "timeShiftFavoriten";
-
-function favoritenLaden() {
-    try {
-        const gespeichert = localStorage.getItem(FAVORITEN_KEY);
-        if (!gespeichert) return [];
-        const daten = JSON.parse(gespeichert);
-        return Array.isArray(daten) ? daten : [];
-    } catch (e) {
-        return [];
-    }
-}
-
-function favoritenSpeichern(liste) {
-    try {
-        localStorage.setItem(FAVORITEN_KEY, JSON.stringify(liste));
-    } catch (e) {}
-}
-
-let favoriten = favoritenLaden();
-
-function istFavorit(stadt) {
-    return favoriten.includes(stadt.name);
-}
-
-function favoritHinzufuegen(stadt) {
-    if (!istFavorit(stadt)) {
-        favoriten.push(stadt.name);
-        favoritenSpeichern(favoriten);
-    }
-}
-
-function favoritLoeschen(stadt) {
-    favoriten = favoriten.filter(name => name !== stadt.name);
-    favoritenSpeichern(favoriten);
-}
-
-// ZIFFERBLATT RENDERN
-const ticksContainer = document.getElementById("ticksContainer");
-for (let i = 0; i < 60; i++) {
-    const tick = document.createElement("div");
-    tick.className = i % 5 === 0 ? "tick" : "tick minor";
-    tick.style.transform = `rotate(${i * 6}deg)`;
-    ticksContainer.appendChild(tick);
-}
-
-const numbersContainer = document.getElementById("numbersContainer");
-const radius = 80;
-for (let i = 1; i <= 12; i++) {
-    const num = document.createElement("div");
-    num.className = "number";
-    num.textContent = i;
-    const angleRad = ((i * 30) - 90) * (Math.PI / 180);
-    const x = 110 + radius * Math.cos(angleRad);
-    const y = 110 + radius * Math.sin(angleRad);
-    num.style.left = `${x}px`;
-    num.style.top = `${y}px`;
-    numbersContainer.appendChild(num);
-}
-
-// VARIABLEN FÜR LOGIK
-let startzeit = null;
-let startZeitzone = null;
-let zielZeitzone = null;
-let startStadt = null;
-let zielStadt = null;
-let startOrtszeit = null;
-let zeitverschiebung = null;
-let gesamtFlugzeit = null;
-let timer = null;
-
-// ELEMENTE REFERENZEN
-const startSearch = document.getElementById("startSearch");
-const destinationSearch = document.getElementById("destinationSearch");
-const startResults = document.getElementById("startResults");
-const destinationResults = document.getElementById("destinationResults");
-const flightDurationInput = document.getElementById("flightDurationInput");
-const startButton = document.getElementById("startButton");
-const cancelButton = document.getElementById("cancelButton");
-const errorMessage = document.getElementById("errorMessage");
-const dialogBackground = document.getElementById("dialogBackground");
-const dialogCancel = document.getElementById("dialogCancel");
-const dialogConfirm = document.getElementById("dialogConfirm");
-
-// FLUGZEIT EINGABE-LOGIK
-let flugzeitZiffern = "";
-
-function flugzeitFormatieren(ziffern) {
-    ziffern = String(ziffern).replace(/\D/g, "").slice(0, 4);
-    if (ziffern.length === 0) return "00:00";
-    const zahl = Number(ziffern);
-    const minuten = zahl % 100;
-    const stunden = Math.floor(zahl / 100);
-    return zweiStellen(stunden) + ":" + zweiStellen(minuten);
-}
-
-function flugzeitAktualisieren() {
-    flightDurationInput.value = flugzeitFormatieren(flugzeitZiffern);
-}
-
-flightDurationInput.addEventListener("focus", function() {
-    setTimeout(function() {
-        flightDurationInput.setSelectionRange(
-            flightDurationInput.value.length,
-            flightDurationInput.value.length
-        );
-    }, 0);
-});
-
-flightDurationInput.addEventListener("keydown", function(event) {
-    if (event.key >= "0" && event.key <= "9") {
-        event.preventDefault();
-        if (flugzeitZiffern.length < 4) {
-            flugzeitZiffern += event.key;
-            flugzeitAktualisieren();
-        }
-        return;
-    }
-    if (event.key === "Backspace" || event.key === "Delete") {
-        event.preventDefault();
-        flugzeitZiffern = flugzeitZiffern.slice(0, -1);
-        flugzeitAktualisieren();
-        return;
-    }
-    if (event.key === "Tab" || event.key === "ArrowLeft" || event.key === "ArrowRight" || event.key === "Home" || event.key === "End") return;
-    if (event.ctrlKey || event.metaKey) return;
-    event.preventDefault();
-});
-
-// STÄDTE-SUCHE & ERGEBNISSE
-function suche(eingabe) {
-    const text = eingabe.trim().toLocaleLowerCase("de");
-    if (text === "") return staedte.slice();
-    return staedte.filter(stadt => stadt.name.toLocaleLowerCase("de").startsWith(text));
-}
-
-function ergebnisseAnzeigen(input, container, ziel) {
-    const treffer = suche(input.value);
-    container.innerHTML = "";
-    const favs = treffer.filter(stadt => istFavorit(stadt));
-    const normale = treffer.filter(stadt => !istFavorit(stadt));
-
-    if (favs.length > 0) {
-        const titel = document.createElement("div");
-        titel.className = "favorite-title";
-        titel.textContent = "⭐ FAVORITEN";
-        container.appendChild(titel);
-    }
-
-    favs.forEach(stadt => {
-        container.appendChild(erstelleErgebnis(stadt, ziel, true, input, container));
-    });
-
-    normale.slice(0, 8).forEach(stadt => {
-        container.appendChild(erstelleErgebnis(stadt, ziel, false, input, container));
-    });
-
-    if (container.children.length === 0) {
-        container.style.display = "none";
-        return;
-    }
-    container.style.display = "block";
-}
-
-function erstelleErgebnis(stadt, ziel, favorit, input, container) {
-    const element = document.createElement("div");
-    element.className = "result";
-
-    const cityName = document.createElement("div");
-    cityName.className = "city-name";
-    cityName.textContent = stadt.name;
-
-    cityName.addEventListener("click", function() {
-        input.value = stadt.name;
-        container.style.display = "none";
-        if (ziel === "start") {
-            startStadt = stadt.name;
-            startZeitzone = stadt.timezone;
-            document.getElementById("startCity").textContent = startStadt;
-        } else {
-            zielStadt = stadt.name;
-            zielZeitzone = stadt.timezone;
-            document.getElementById("destinationCity").textContent = zielStadt;
-        }
-    });
-
-    element.appendChild(cityName);
-
-    if (favorit) {
-        const button = document.createElement("button");
-        button.className = "delete-favorite-button";
-        button.textContent = "🗑️";
-        button.title = "Favorit löschen";
-        button.addEventListener("click", function(event) {
-            event.stopPropagation();
-            favoritLoeschen(stadt);
-            ergebnisseAnzeigen(input, container, ziel);
+    // PWA Service Worker Registrierung
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
         });
-        element.appendChild(button);
-    } else {
-        const button = document.createElement("button");
-        button.className = "favorite-button";
-        button.textContent = "☆";
-        button.title = "Zu Favoriten hinzufügen";
-        button.addEventListener("click", function(event) {
-            event.stopPropagation();
-            favoritHinzufuegen(stadt);
-            ergebnisseAnzeigen(input, container, ziel);
+    }
+
+    // Städteliste mit Zeitzonen
+    const cities = [
+        { name: "Amsterdam", timezone: "Europe/Amsterdam" },
+        { name: "Athen", timezone: "Europe/Athens" },
+        { name: "Bangkok", timezone: "Asia/Bangkok" },
+        { name: "Beijing", timezone: "Asia/Shanghai" },
+        { name: "Berlin", timezone: "Europe/Berlin" },
+        { name: "Dubai", timezone: "Asia/Dubai" },
+        { name: "Frankfurt", timezone: "Europe/Berlin" },
+        { name: "Hongkong", timezone: "Asia/Hong_Kong" },
+        { name: "Istanbul", timezone: "Europe/Istanbul" },
+        { name: "Johannesburg", timezone: "Africa/Johannesburg" },
+        { name: "Kairo", timezone: "Africa/Cairo" },
+        { name: "London", timezone: "Europe/London" },
+        { name: "Los Angeles", timezone: "America/Los_Angeles" },
+        { name: "New York", timezone: "America/New_York" },
+        { name: "Paris", timezone: "Europe/Paris" },
+        { name: "Rom", timezone: "Europe/Rome" },
+        { name: "Singapur", timezone: "Asia/Singapore" },
+        { name: "Sydney", timezone: "Australia/Sydney" },
+        { name: "Tokio", timezone: "Asia/Tokyo" },
+        { name: "Zürich", timezone: "Europe/Zurich" }
+    ].sort((a, b) => a.name.localeCompare(b.name, "de"));
+
+    // DOM Elemente
+    const depSelect = document.getElementById('depCity');
+    const arrSelect = document.getElementById('arrCity');
+    const departureInput = document.getElementById('departureTime');
+    const durationInput = document.getElementById('flightDuration');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const simSlider = document.getElementById('simSlider');
+    const progressText = document.getElementById('progressText');
+    const simTimeDisplay = document.getElementById('simTimeDisplay');
+    const elapsedDisplay = document.getElementById('elapsedDisplay');
+    const canvas = document.getElementById('sim-clock');
+    const ctx = canvas.getContext('2d');
+
+    // Dropdowns füllen
+    cities.forEach(city => {
+        const opt1 = document.createElement('option');
+        opt1.value = city.name;
+        opt1.textContent = city.name;
+        depSelect.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = city.name;
+        opt2.textContent = city.name;
+        arrSelect.appendChild(opt2);
+    });
+
+    // Default-Werte setzen
+    depSelect.value = "Frankfurt";
+    arrSelect.value = "Tokio";
+    
+    const now = new Date();
+    now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+    departureInput.value = now.toISOString().slice(0, 16);
+
+    // Hilfsfunktionen für Zeitzonen und Minuten
+    function getTzOffsetMinutes(date, timezone) {
+        const parts = new Intl.DateTimeFormat("en-US", {
+            timeZone: timezone,
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit",
+            hourCycle: "h23"
+        }).formatToParts(date);
+        
+        const w = {};
+        parts.forEach(p => { if(p.type !== "literal") w[p.type] = Number(p.value); });
+        const localUTC = Date.UTC(w.year, w.month - 1, w.day, w.hour, w.minute, w.second);
+        return (localUTC - date.getTime()) / 60000;
+    }
+
+    function getMinutesSinceMidnight(date, timezone) {
+        const parts = new Intl.DateTimeFormat("de-DE", {
+            timeZone: timezone,
+            hour: "2-digit", minute: "2-digit", second: "2-digit",
+            hourCycle: "h23"
+        }).formatToParts(date);
+
+        let h = 0, m = 0, s = 0;
+        parts.forEach(p => {
+            if (p.type === "hour") h = Number(p.value);
+            if (p.type === "minute") m = Number(p.value);
+            if (p.type === "second") s = Number(p.value);
         });
-        element.appendChild(button);
-    }
-    return element;
-}
-
-startSearch.addEventListener("focus", function() { ergebnisseAnzeigen(startSearch, startResults, "start"); });
-startSearch.addEventListener("input", function() {
-    startStadt = null; startZeitzone = null;
-    document.getElementById("startCity").textContent = "—";
-    ergebnisseAnzeigen(startSearch, startResults, "start");
-});
-
-destinationSearch.addEventListener("focus", function() { ergebnisseAnzeigen(destinationSearch, destinationResults, "destination"); });
-destinationSearch.addEventListener("input", function() {
-    zielStadt = null; zielZeitzone = null;
-    document.getElementById("destinationCity").textContent = "—";
-    ergebnisseAnzeigen(destinationSearch, destinationResults, "destination");
-});
-
-document.addEventListener("click", function(event) {
-    if (!startSearch.contains(event.target) && !startResults.contains(event.target)) {
-        startResults.style.display = "none";
-    }
-    if (!destinationSearch.contains(event.target) && !destinationResults.contains(event.target)) {
-        destinationResults.style.display = "none";
-    }
-});
-
-// SIMULIERTE BERECHNUNGS-LOGIK (AUS CODE 2 UEBERNOMMEN)
-function berechnen() {
-    if (startzeit === null || gesamtFlugzeit === null) return;
-    let vergangen = (Date.now() - startzeit.getTime()) / 60000;
-
-    if (vergangen >= gesamtFlugzeit) {
-        vergangen = gesamtFlugzeit;
-        clearInterval(timer);
-        timer = null;
+        return h * 60 + m + s / 60;
     }
 
-    const beschleunigungsfaktor = 1 + (zeitverschiebung / gesamtFlugzeit);
-    let theoretischeZeit = startOrtszeit + (vergangen * beschleunigungsfaktor);
-    theoretischeZeit = normalisiereMinuten(theoretischeZeit);
+    // Mathematische Berechnung der simulierten Zeit (Logik aus Version 2)
+    function getSimulatedTime(progress) {
+        const depCity = cities.find(c => c.name === depSelect.value);
+        const arrCity = cities.find(c => c.name === arrSelect.value);
+        const flightDurationMinutes = parseFloat(durationInput.value) * 60;
+        const elapsedMins = flightDurationMinutes * progress;
 
-    const stunden = theoretischeZeit / 60;
-    const minuten = theoretischeZeit % 60;
-    const sekunden = (theoretischeZeit * 60) % 60;
+        const startDate = new Date(departureInput.value);
+        const startOrtszeit = getMinutesSinceMidnight(startDate, depCity.timezone);
+        
+        const startOffset = getTzOffsetMinutes(startDate, depCity.timezone) * 60000;
+        const zielOffset = getTzOffsetMinutes(startDate, arrCity.timezone) * 60000;
+        const zeitverschiebung = (zielOffset - startOffset) / 60000;
 
-    const stundenWinkel = (stunden % 12) * 30 + 180;
-    const minutenWinkel = minuten * 6 + 180;
-    const sekundenWinkel = sekunden * 6 + 180;
+        const beschleunigungsfaktor = 1 + (zeitverschiebung / flightDurationMinutes);
+        let theoretischeZeit = startOrtszeit + (elapsedMins * beschleunigungsfaktor);
+        
+        // Normalisierung (0 bis 1440 Minuten)
+        theoretischeZeit = ((theoretischeZeit % 1440) + 1440) % 1440;
 
-    document.getElementById("hourHand").style.transform = `rotate(${stundenWinkel}deg)`;
-    document.getElementById("minuteHand").style.transform = `rotate(${minutenWinkel}deg)`;
-    document.getElementById("secondHand").style.transform = `rotate(${sekundenWinkel}deg)`;
+        const stunden = theoretischeZeit / 60;
+        const minuten = theoretischeZeit % 60;
+        const sekunden = (theoretischeZeit * 60) % 60;
 
-    aktualisiereOrtszeiten();
-
-    document.getElementById("elapsed").textContent = dauerFormatieren(vergangen);
-    document.getElementById("remaining").textContent = dauerFormatieren(Math.max(0, gesamtFlugzeit - vergangen));
-}
-
-function flugzeitAuslesen() {
-    if (flugzeitZiffern === "") return null;
-    const zahl = Number(flugzeitZiffern);
-    const minuten = zahl % 100;
-    const stunden = Math.floor(zahl / 100);
-    if (minuten >= 60) return null;
-    const gesamt = stunden * 60 + minuten;
-    if (gesamt <= 0) return null;
-    return gesamt;
-}
-
-startButton.addEventListener("click", function() {
-    errorMessage.textContent = "";
-    if (!startStadt || !startZeitzone) {
-        errorMessage.textContent = "Bitte einen Abflugort auswählen.";
-        return;
-    }
-    if (!zielStadt || !zielZeitzone) {
-        errorMessage.textContent = "Bitte einen Zielort auswählen.";
-        return;
-    }
-    const flugzeit = flugzeitAuslesen();
-    if (flugzeit === null) {
-        errorMessage.textContent = "Bitte eine gültige Flugzeit eingeben.";
-        return;
+        return { hours: stunden, minutes: minuten, seconds: sekunden, elapsedMins: elapsedMins };
     }
 
-    gesamtFlugzeit = flugzeit;
-    startzeit = new Date();
-    startOrtszeit = minutenSeitMitternacht(startzeit, startZeitzone);
+    // Zeichnen der analogen Uhr auf das Canvas
+    function drawAnalogClock(canvasId, hours, minutes, seconds) {
+        const radius = canvas.width / 2;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.save();
+        ctx.translate(radius, radius);
 
-    const startOffset = zeitzonenOffset(startzeit, startZeitzone);
-    const zielOffset = zeitzonenOffset(startzeit, zielZeitzone);
-    zeitverschiebung = (zielOffset - startOffset) / 60000;
+        // Zifferblatt
+        ctx.beginPath();
+        ctx.arc(0, 0, radius - 5, 0, 2 * Math.PI);
+        ctx.fillStyle = '#0f172a';
+        ctx.fill();
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 4;
+        ctx.stroke();
 
-    startSearch.disabled = true;
-    destinationSearch.disabled = true;
-    flightDurationInput.disabled = true;
+        // Markierungen
+        for (let i = 0; i < 12; i++) {
+            const angle = i * (Math.PI / 6);
+            ctx.rotate(angle);
+            ctx.beginPath();
+            ctx.moveTo(0, -radius + 10);
+            ctx.lineTo(0, -radius + 18);
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.rotate(-angle);
+        }
 
-    startButton.textContent = "Flug läuft …";
-    startButton.disabled = true;
-    cancelButton.style.display = "inline-block";
+        // Winkelberechnungen
+        const hourAngle = ((hours % 12) + minutes / 60 + seconds / 3600) * (Math.PI / 6);
+        const minuteAngle = (minutes + seconds / 60) * (Math.PI / 30);
 
-    ankunftAnzeigen();
+        // Stundenzeiger
+        ctx.save();
+        ctx.rotate(hourAngle);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -radius * 0.5);
+        ctx.strokeStyle = '#f8fafc';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.restore();
 
-    if (timer !== null) clearInterval(timer);
-    timer = setInterval(berechnen, 100);
-    berechnen();
-});
+        // Minutenzeiger
+        ctx.save();
+        ctx.rotate(minuteAngle);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(0, -radius * 0.75);
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 3;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        ctx.restore();
 
-cancelButton.addEventListener("click", function() { dialogBackground.style.display = "flex"; });
-dialogCancel.addEventListener("click", function() { dialogBackground.style.display = "none"; });
-dialogConfirm.addEventListener("click", function() {
-    dialogBackground.style.display = "none";
-    flugZuruecksetzen();
-});
+        // Mittelpunkt
+        ctx.beginPath();
+        ctx.arc(0, 0, 6, 0, 2 * Math.PI);
+        ctx.fillStyle = '#38bdf8';
+        ctx.fill();
 
-function ankunftAnzeigen() {
-    if (!startzeit || !zielZeitzone || !gesamtFlugzeit) return;
-    const ankunft = new Date(startzeit.getTime() + gesamtFlugzeit * 60000);
+        ctx.restore();
+    }
 
-    const datumFormatter = new Intl.DateTimeFormat("de-DE", {
-        timeZone: zielZeitzone,
-        weekday: "long",
-        day: "2-digit",
-        month: "long",
-        year: "numeric"
+    // Aktualisierungs-Routine für die Anzeigen
+    function updateClocks(progress) {
+        const simData = getSimulatedTime(progress);
+
+        drawAnalogClock('sim-clock', simData.hours, simData.minutes, simData.seconds);
+
+        // Textuelle Zeitanzeige
+        const h = Math.floor(simData.hours);
+        const m = Math.floor(simData.minutes);
+        simTimeDisplay.textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+
+        // Verstrichene Flugzeit
+        const elapsedH = Math.floor(simData.elapsedMins / 60);
+        const elapsedM = Math.floor(simData.elapsedMins % 60);
+        elapsedDisplay.textContent = `${elapsedH} Std. ${elapsedM} Min.`;
+    }
+
+    // Event Listener
+    simSlider.addEventListener('input', (e) => {
+        const progress = e.target.value / 100;
+        progressText.textContent = `${e.target.value}%`;
+        updateClocks(progress);
     });
 
-    const zeitFormatter = new Intl.DateTimeFormat("de-DE", {
-        timeZone: zielZeitzone,
-        hour: "2-digit",
-        minute: "2-digit",
-        hourCycle: "h23"
+    startBtn.addEventListener('click', () => {
+        simSlider.value = 0;
+        progressText.textContent = "0%";
+        updateClocks(0);
     });
 
-    document.getElementById("arrivalCity").textContent = zielStadt;
-    document.getElementById("arrivalDate").textContent = datumFormatter.format(ankunft);
-    document.getElementById("arrivalTime").textContent = zeitFormatter.format(ankunft);
-}
+    resetBtn.addEventListener('click', () => {
+        simSlider.value = 0;
+        progressText.textContent = "0%";
+        updateClocks(0);
+    });
 
-function aktualisiereOrtszeiten() {
-    if (!startZeitzone || !zielZeitzone) return;
-    const jetzt = new Date();
-    document.getElementById("startTime").textContent = uhrzeitInZeitzone(jetzt, startZeitzone);
-    document.getElementById("destinationTime").textContent = uhrzeitInZeitzone(jetzt, zielZeitzone);
-}
-
-function uhrzeitInZeitzone(datum, zeitzone) {
-    return new Intl.DateTimeFormat("de-DE", {
-        timeZone: zeitzone,
-        hour: "2-digit",
-        minute: "2-digit",
-        hourCycle: "h23"
-    }).format(datum);
-}
-
-function minutenSeitMitternacht(datum, zeitzone) {
-    const teile = new Intl.DateTimeFormat("de-DE", {
-        timeZone: zeitzone,
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hourCycle: "h23"
-    }).formatToParts(datum);
-
-    let stunde = 0, minute = 0, sekunde = 0;
-    for (const teil of teile) {
-        if (teil.type === "hour") stunde = Number(teil.value);
-        if (teil.type === "minute") minute = Number(teil.value);
-        if (teil.type === "second") sekunde = Number(teil.value);
-    }
-    return stunde * 60 + minute + sekunde / 60;
-}
-
-function zeitzonenOffset(datum, zeitzone) {
-    const teile = new Intl.DateTimeFormat("en-US", {
-        timeZone: zeitzone,
-        year: "numeric", month: "2-digit", day: "2-digit",
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
-        hourCycle: "h23"
-    }).formatToParts(datum);
-
-    const werte = {};
-    for (const teil of teile) {
-        if (teil.type !== "literal") werte[teil.type] = Number(teil.value);
-    }
-
-    const lokaleZeit = Date.UTC(werte.year, werte.month - 1, werte.day, werte.hour, werte.minute, werte.second);
-    return lokaleZeit - datum.getTime();
-}
-
-function uhrZuruecksetzen() {
-    document.getElementById("hourHand").style.transform = "rotate(180deg)";
-    document.getElementById("minuteHand").style.transform = "rotate(180deg)";
-    document.getElementById("secondHand").style.transform = "rotate(180deg)";
-}
-
-function flugZuruecksetzen() {
-    if (timer !== null) { clearInterval(timer); timer = null; }
-    startzeit = null; startZeitzone = null; zielZeitzone = null;
-    startStadt = null; zielStadt = null;
-    startOrtszeit = null; zeitverschiebung = null; gesamtFlugzeit = null;
-    flugzeitZiffern = "";
-
-    startSearch.value = "";
-    destinationSearch.value = "";
-    flugzeitAktualisieren();
-
-    startSearch.disabled = false;
-    destinationSearch.disabled = false;
-    flightDurationInput.disabled = false;
-
-    document.getElementById("startCity").textContent = "—";
-    document.getElementById("destinationCity").textContent = "—";
-    document.getElementById("startTime").textContent = "--:--";
-    document.getElementById("destinationTime").textContent = "--:--";
-    document.getElementById("elapsed").textContent = "00:00";
-    document.getElementById("remaining").textContent = "--:--";
-    document.getElementById("arrivalCity").textContent = "—";
-    document.getElementById("arrivalDate").textContent = "—";
-    document.getElementById("arrivalTime").textContent = "--:--";
-    errorMessage.textContent = "";
-
-    startButton.textContent = "Flug starten";
-    startButton.disabled = false;
-    cancelButton.style.display = "none";
-
-    uhrZuruecksetzen();
-}
-
-function normalisiereMinuten(minuten) {
-    minuten = minuten % (24 * 60);
-    if (minuten < 0) minuten += 24 * 60;
-    return minuten;
-}
-
-function dauerFormatieren(minuten) {
-    const stunden = Math.floor(minuten / 60);
-    const rest = Math.floor(minuten % 60);
-    return zweiStellen(stunden) + ":" + zweiStellen(rest);
-}
-
-function zweiStellen(zahl) {
-    return String(Math.floor(zahl)).padStart(2, "0");
-}
-
-uhrZuruecksetzen();
-
+    // Initiales Zeichnen beim Laden
+    updateClocks(0);
 </script>
 
 </body>
